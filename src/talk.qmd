@@ -1,0 +1,957 @@
+---
+title: "Design Experiment: A primer with emphasis on AB Testing"
+subtitle: "Gem City Tech ML/AI Meetup"
+date: "Dec. 15 2022"
+author: "Presented by Evelyn J. Boettcher, DiDacTex, LLC"
+title-slide-attributes:
+    data-background-image: 'img/logos/gem_cityML_slide.png'
+    data-background-size: "100% 100% "
+    data-background-position: "0% "
+    data-background-opacity: "0.95"
+format:
+    revealjs:
+        incremental: false
+fig-cap-location: margin
+bibliography: references.bib
+
+---
+
+
+## Welcome to Gem City Tech ML/AI
+
+:::{.columns}
+::::{.column width=72%}
+
+We meet every third Thursday and are part of Gem City Tech meetup group
+
+<br>
+
+GemCity TECH’s mission is to grow the local industry and the community by providing a centralized destination for
+technical training, workshops and providing a forum for collaborating.
+
+<br>
+
+Currently, support several special interest groups from a variety of technical disciplines.
+::::
+::::{.column width=26%}
+![](./img/logos/qr-code.png)
+::::
+:::
+
+- Dayton Web Developers
+- Dayton Dynamic Languages
+- Dayton .net Developers
+- Gem City Games Developments
+- New to Tech
+- Frameworks
+- **Machine Learning / Artificial Intelligence (ML/AI)**
+- Code for Dayton
+
+---
+
+## Big Thanks to our Sponsors
+
+<br>
+<br>
+
+:::{.columns}
+::::{.column width=30%}
+
+#### Gem City Tech
+![](./img/logos/GCTLogo.png)
+
+::::
+::::{.column width=30%}
+
+#### The Hub
+ ![](./img/logos/The-Hub-Logo-PNC.jpg)
+::::
+::::{.column width=30%}
+#### Technology First
+ ![](./img/logos/tech_first_logo.jpg)
+
+::::
+::::
+
+<br>
+
+:::{.columns}
+::::{.column width=30%}
+#### Human IT
+ ![](./img/logos/HumanIT-Logo.png)
+
+::::
+::::{.column width=30%}
+#### Pizza Factory
+ ![](./img/logos/pizzalogo.png)
+
+::::
+:::
+
+
+* GemCity TECH: [GemCity.Tech](https://Gemcity.tech)
+* The Innovation Hub: [thehubdayton.com](https://www.thehubdayton.com/)
+* Technology First: [www.technologyfirst.org](https://www.technologyfirst.org/)
+* Human IT: [https://humanit.us/](https://humanit.us/)
+* Pizza Factory: [https://pizzafactory.biz/](https://pizzafactory.biz/)
+
+---
+
+### Calendar Events
+
+* Gem City Tech ML/AI: Third Thursday at 6.
+* The GemCity TECH Meetup calendar of upcoming events: [www.meetup.com/gem-city-tech](https://www.meetup.com/gem-city-tech/events/calendar/)
+* [The Technology First events calendar](https://www.technologyfirst.org/Technology-First-Events?EventViewMode=1&EventListViewMode=2&SelectedDate=8/20/2022&CalendarViewType=1)
+
+* May 18th will be at 1pm at WBI.
+
+---
+
+## Why Design an Experiment
+
+It cost money to run experiment, train algorithms and implement algorithms.
+<br>
+We saw this in March's meetup where initially one needed to upgrade to Pro Colab.
+But then we saw that we could reduce sample size and runtime. 
+Which might have allowed us to scrapped by with the free version of Colab. 
+
+<br>
+There are mathematical models you can use to identify what is the number of sample you need to get good results.
+
+<br>
+In addition, not knowing how to adjust your experiment to meet the risk, can **cost you your job** and or the company a lot of money.
+
+<br>
+Recently, Google debuted their version of ChatGPT. This was a high risk demo. It also failed and cost the company $100B in valuation. 
+
+<br>
+You need to know how to adjust your experiments for the risk.
+
+This is where design experimentation comes in. How does one adjust for risk while reducing the cost of running the experiment.
+
+<br>
+
+One way to reduce cost and risk is to set-up an A/B Test.
+
+---
+
+## What is A/B Testing
+
+<br>
+
+
+A/B testing is a **randomized** controlled experiment done in production.
+
+<br>
+There are two tests: A and B, in which a single variable adjusted (B Test).
+<br>
+<br>
+This variation, **might** affect a user's behavior.
+<br>
+
+![](./img/ab.svg)
+
+<br>
+
+#### Goal: Increase End User's Objective
+
+* **Business:** Income increases >> Costs of change
+* **Health Care:**  Health increases >> Side effect
+
+:::{.notes}
+
+* Not explicitly telling users they are in a test
+* "User" is loosely used.  It could be servers, Say testing speed: Google vs AWS cloud
+:::
+
+---
+
+#### So why do A/B Testing
+
+::: {.incremental}
+- Why spend the resources to do tests
+- Why risk angering your customers with changes?
+- I got data miners, I do not need tests!  
+- I am a ML Scientist, I don't need to know the business side
+
+:::
+
+---
+
+
+### Life is complicated. 
+
+Domain knowledge only gets you so far!
+
+<br>
+
+Subject-matter experts (SME) from Microsoft, Netflixs etc, find when they implement changes 
+that only a small fraction of their ideas have the planned outcome [@sweet].
+
+<br>
+
+Even though we are isolating a single variable, 
+that variable interacts with a million other variables.
+<br>
+You simply can not model everything or know everything.
+
+::::{.columns}
+:::{.column width=45%}
+
+![](./img/10_lightbulb.webp)
+
+:::
+::: {.column width=55%}
+
+::: {.incremental}
+
+- #### Any change can hurt. 
+  - Even tested changes
+    - Though less likely!
+- #### Change can help
+  - "If you're not growing, <br>you're die-ing" 
+
+:::
+:::
+::::
+
+---
+
+## Gedanken: { background-image='img/bluebox.svg' background-size="100% 100% " background-position="0%  center" }
+
+
+::::{.columns}
+:::{.column width=70%}
+### Trader Janes has a New Pizza
+Say there is a grocer called Trader Janes and it wants to add a new pizza to its line up.
+<br>
+However, they need to keep the same number of types it sells a constant.
+Freezer only holds N pizzas.
+
+<br>
+They will have to remove one pizza from their lineup to add the new item.
+<br>
+<br>
+<br>
+
+### Typical Work flow
+
+- Marketing asks a _Data Miner_ to rank popularity of pizza.
+- The Data Miner finds the pizza that sells the least.
+- Stores remove that pizza.
+- Stores add new pizza.
+
+:::
+:::{.column width=29%}
+
+![](./img/yummy-pizza-1327587.jpg){width=270,}
+![](./img/marketing.svg)
+:::
+::::
+
+
+[Arjun Kartha's pizza pic](https://www.freeimages.com/photo/yummy-pizza-1327587)
+
+---
+
+## { background-image='img/blue_shape.svg' background-size="100% 100% " background-position="0%  center" }
+
+
+::::{.columns}
+:::{.column width=60%}
+
+### New Pizza added!!!
+<br>
+
+
+
+#### Unfortunately:  
+
+A week later sales go down.
+
+<br>
+<br>
+
+:::
+:::{.column width=30%}
+
+![](./img/sales_down.webp)
+
+:::
+::::
+
+
+### What happened?
+
+::: {.incremental}
+
+- Don't know, because the store implemented many changes that week!
+- It's the week after Thanksgiving and sales always go down that week.
+- Turns out there was a small group of heavy spenders that love this pizza.
+
+:::
+
+<br>
+<br>
+
+
+#### A / B Testing help predict what changes will increase the bottom line.
+
+---
+
+## A / B Testing Limitations { background-image='img/blue_shape.svg' background-size="100% 100% " background-position="0%  center" }
+
+
+A/B Testing is used to clarify a vision, but does not create vision.
+
+<br>
+
+For example, an ophthalmologist quickly gives you a set of two choices; 
+1 or 2 (2 or 3) that lead to sharpen vision.  Their test, like A/B, can not give you vision.
+
+<br>
+
+##### Though without a clarity,  a vision has serious limitation.
+
+![](./img/glasses.webp){.absolute width="70%"}
+
+
+
+---
+
+
+### A/B Testing and the Three ways
+
+![](./img/devops_ways.svg){width=550px}
+
+::::{.columns}
+:::{.column width=65%}
+
+<br>
+
+
+A/B Testing is an extension of DevOps.  
+Feedback will be the results of the A/B Testing.
+<br>
+<br>
+
+#### However
+##### Experimentation happens in production!
+
+:::
+:::{.column width=35%}
+
+![](./img/devops_ways-AB.svg)
+
+:::
+::::
+
+---
+
+## A/B Tests 
+### The good, the bad and the ugly
+
+:::: {.columns }
+::: {.column width=10% }
+:::
+::: {.column width=70% }
+
+
+#### Rewards
+
+- Increase companies goals: (make more successful):
+  - Business: Profits
+  - Healthcare: Health
+  - Defence: Situational Awareness
+  
+:::
+::::
+
+::::{.columns}
+:::{.column}
+
+#### Risks
+
+- Test cost time and money
+- Don't know what percent of risk is acceptable
+  - Medical and Defence will have higher threshold of risk
+- Upset customers
+- Change can make things worse
+
+
+:::
+:::{.column}
+
+
+#### Mitigation 
+
+- Have the smallest test possible
+- 5% False Positive 
+- 20% False Negative
+  - Typical of non life critical changes
+- Minimize number of samples
+
+:::
+::::
+
+
+---
+
+
+
+## Reducing Costs 
+### Minimal Viable Product
+
+Need to create the smallest, fastest A/B Test that is statistically meaningful.
+
+<br>
+<br> 
+
+### How do you minimize the number of samples (N)?
+
+<br>
+
+Want an N samples that show a 5% false positive and 20% false negative.
+
+<br>
+
+$$
+N = ?
+$$
+
+---
+
+## 
+### Use Statistics 
+
+<br>
+
+Defines minimum number of samples (**N**) as:
+
+$$
+N > 2.48 \left( \frac{\sigma_\Delta}{\Delta} \right)^2
+$$
+
+<hr>
+
+- $\Delta$: How much of a difference is needed to make the change
+  - It cost money to make a change
+  - Increase to bottom line needs to be significant, to accept risk
+    -  _Example_: Trader Jane's Pizza needs sales to increase by 3%
+- $\sigma_\Delta$: estimated by business historical data
+  - $\sigma_\Delta$ = $~\sqrt{2 \sigma_{log}^2}$
+    - $\sigma_{log}$: How much does sales fluctuate over a given time period.
+
+---
+
+
+### Important
+
+<br>
+
+- #### Unless there is a clear, measurable advantage, no change should occur.
+
+<br>
+
+- #### There is no guarantee that change will be effective.
+    
+<br>
+<hr>
+<br>
+<br>
+
+#### Bias and Harm
+
+In addition, our testing and product should do **no** harm.
+
+<br>
+
+More on this later
+
+---
+
+<br><br><br>
+
+### Where does 2.48 comes from?
+
+<br>
+<br>
+
+
+$$
+N > 2.48 \left( \frac{\sigma_\Delta}{\Delta} \right)^2
+$$
+
+---
+
+## Rules of Thumb: 20 / 5 Rule 
+
+<br>
+
+#### Assume there is no difference between A and B
+
+$$
+\Delta = 0 \\
+ \Delta = B - A 
+$$
+
+<br>
+<hr>
+::::{.columns}
+:::{.column}
+
+**False positive** 
+
+- A is better but, you implemented B
+- incurs an explicit cost
+
+:::
+:::{.column}
+
+**False negative** 
+
+- B is better but, you stuck with A
+- incurs an implicit cost
+
+
+:::
+::::
+<hr>
+
+::::{.columns}
+:::{.column}
+
+| $\alpha$ == **False Positive rate** 
+
+* 5% => $z_{score}$ = -1.64
+
+<br>
+
+| You can assume B is better than A
+
+:::
+:::{.column}
+
+| $\beta$== **False Negative rate** 
+
+* 20% => $z_{score}$ = 0.84
+
+<br>
+
+| You can assume A is better than B
+
+:::
+::::
+
+---
+
+
+#### From Standard Normal Distribution
+
+::::{.columns}
+:::{.column width=32%}
+
+
+**Mean** is 0
+
+<br>
+
+**Standard deviation**: $\sigma$
+
+
+<br>
+
+$z_{score}$ measures the distance between a 
+ point and the mean in units of $\sigma$
+
+----
+<br>
+
+| $Z_{score}$ = -1.64 (**5%**)
+
+| $Z_{score}$ = 0.84 (**20%**)
+
+<br>
+
+$$
+1.64 + 0.84 = 2.48
+$$
+
+<br>
+
+
+* *Graph [@norm-dist]
+
+:::
+:::{.column width=68%}
+
+<iframe width=720px height=530px src="norm-dist.html"></iframe>
+
+:::
+::::
+
+---
+
+
+
+
+::::{.columns}
+:::{.column}
+
+### False Positive 
+
+| $\alpha$ == **False Positive rate** 
+
+* 5% => $z_{score}$ = -1.64
+
+<br>
+
+|  Assume: B is better than A
+
+
+:::
+:::{.column}
+
+### False Negative 
+
+| $\beta$== **False Negative rate** 
+
+* 20% => $z_{score}$ = 0.84
+
+<br>
+
+| Assume: A is better than B
+
+:::
+::::
+
+<br>
+<br>
+
+
+::::{.columns}
+:::{.column}
+
+
+  
+![](./img/z-score.png){width=450}
+
+:::
+:::{.column}
+
+![](./img/z-score-20.png){width=485}
+
+:::
+::::
+
+---
+
+## { background-image='img/bluebox.svg' background-size="100% 100% " background-position="0%  center" }
+### Yeah,
+
+we have our minimal viable test.
+
+<br>
+
+
+But we are not done yet.  
+
+<br>
+
+One more thing to worry about
+
+<br>
+
+
+### Can this (change/test) harm our customers?
+
+---
+
+## Do no Harm: F potential { background-image='img/blue_shape.svg' background-size="100% 100% " background-position="0%  center" }
+
+If we implement B, how F--ed up will that make the users?
+
+<br>
+
+If we tested B, how F--ed up will that make the users?
+
+---
+
+### Social Sites
+A/B Testing is being done on users without consent, knowledge and at scale (100K of users).
+
+<br>
+
+Group mindset has been around since the 1950's.
+Current research shows that our minds physically change when we work together [@change-minds] socially.
+
+So it is scary to read 
+
+* Facebook: Tested their algorithm to see if it really does radicalize people [@facebook-radical]
+* LinkedIn: Tested on 20 million users to find out how links affect people's career/jobs [@linkedin-jobs]
+* Facebook: Tested on 700,000 users to see if they can make them sad [@facebook-sad]
+
+### Health Care
+
+* Drug Companies: OxyContin [@oxycontin]
+  * 1% addiction rate advertised (From non real world users)
+  * 10-30% addiction rate in real life
+
+---
+
+
+### Remedy
+
+#### Good news
+
+There are already strong standard for testing on human subjects.  
+There is the IRB (Internal review board) preprocess.
+
+<br>
+
+It has required and continuous training and certification: CiTI training.
+
+<br>
+
+
+#### Bad news
+
+Only required for companies receiving federal government funding: Universities, Air Force, Army etc.
+
+<br>
+
+Not required for companies that work with schools (state and local funding) and social media companies.
+
+<br>
+
+### F potential
+
+In light of this, I propose researchers use the F potential.
+
+<br>
+
+(Currently, not a real thing.  Just something to think about.)
+
+---
+
+### $F_{upped}$  Potential
+
+$$
+F_{upped} =  \begin{cases}
+       \text{1,} &\quad\text{if seriously harmed}\\
+       \text{0.5,} &\quad\text{if slightly harmed} \\
+       \text{0,} &\quad\text{if not measurable}\\
+       \text{-0.5,} &\quad\text{becomes better} \\
+       \text{-1,} &\quad\text{becomes a lot better} \\
+     \end{cases}
+$$
+
+If $F_{upped}$ > 0, test should be a no-go.
+
+If $F_{upped}$ < 0, $\Delta$ should be halved. 
+
+* e.g. $\Delta$ is the amount of gain the company needs to make the change.
+
+<br>
+
+_Example_: Trader Jane's Pizza needs sales to increase by 3% ($\Delta$). <br>
+If pizza made people better, then $\Delta=1.5\%$.
+
+---
+
+
+
+## One more thing to worry about 
+
+## Seen and Unseen Bias { background-image='img/blue_shape.svg' background-size="100% 100% " background-position="0%  center" }
+
+Biases can increase the F-potential. 
+
+<br>
+<hr>
+<br>
+
+Luckily, A/B Testing can help with both unseen and seen bias.
+
+
+
+---
+
+## { background-image='img/blue_shape.svg' background-size="100% 100% " background-position="0%  center" }
+### Example: Unseen Bias
+
+I know of three small business that where started by **young** women 
+in the Dayton area. 
+
+<br>
+
+Their original logo design used beautifully detailed font.
+
+<br>
+
+Unfortunately, this detailed font would make it difficult for people like me (over 40) to read it.
+
+<br>
+<hr>
+
+They literally could see their logo.
+
+<br>
+
+#### However
+
+Their logo was not readable to me when I drove by!
+
+<br>
+<hr>
+<br>
+
+
+#### This is an unseen bias.
+
+These women (All of whom where lovely and kind) 
+did not know that they made a 
+logo could not be read by me.
+
+
+---
+
+
+
+### Contrast threshold function (CTF) of the Eye
+
+The human eye's ability to resolve a spatial frequency is dependent on contrast.
+This contrast threshold function will change with age.
+
+- At ~40 your eye will need more contrast to *see*.
+
+![](./img/Contrast_freq.webp){.absolute width=98%}
+---
+
+## { background-image='img/bluebox.svg' background-size="100% 100% " background-position="0%  center" }
+### Logos evolve with Testing
+
+
+::::{.columns}
+:::{.column width="51%"}
+
+#### Starbucks Logo Evolution
+
+<br>
+
+
+Starbucks Logo has evolved to reduce high spatial information.
+
+<br>
+
+- Old Logo: High frequency information 
+  - thin lines
+- New Logo: Medium frequency:
+  - medium width lines
+
+<br>
+[@starbucks]
+
+:::
+:::{.column width="45%"}
+
+![](./img/Starbucks-Logo-history.jpg){fig-align=center}
+
+
+:::
+::::
+
+
+### Change Risks
+
+- Attract more old people, alienate young
+- Loyal customers might not like change
+
+---
+
+## Voice Bias in 21st century? { background-image='img/blue_shape.svg' background-size="100% 100% " background-position="0%  center" }
+
+With more diverse workforce, a research(er) bias  will go down.  
+
+- **True**
+
+<br>
+<hr>
+<br>
+
+##### But, there is still unseen bias in voice in the 21st century!
+
+<br>
+
+Google and Apple had a hard time getting voice recognition 
+to work for kids [@kids_voice]
+
+<br>
+
+Not only do kids speak at higher frequencies than women, they have different speaking patterns.
+
+<br>
+
+One can not simply take an adult's voice and shift the frequency.
+So ML/AI have a hard time figuring what kids are saying.
+
+<br>
+
+### Why kids are important
+
+The market for voice recognition for kids looks to have a strong market growth.
+
+
+---
+
+## Conclusion { background-image='img/blue_shape.svg' background-size="100% 100% " background-position="0%  center" }
+
+
+A/B testing is a **randomized** controlled experiment done **in production**.
+
+<br>
+There are two tests: A and B, in which a single variable adjusted (B Test).
+<br>
+
+This variation, **might** affect a user's behavior.
+ 
+
+<hr>
+<br>
+
+### Your A/B Testing should:
+
+* Make the company more successful.
+* Follow some ethical guidelines, like the **$F_{upped}$** potential
+   - If $F_{upped}$ > 0, test should be a no-go.
+   - If $F_{upped}$ < 0, $\Delta$ should be halved. 
+
+<br>
+<hr>
+<br>
+
+### A/B Testing has Risk
+
+No free lunch.  
+Even after testing, test results might not make the company more successful.
+
+
+
+
+---
+
+### Thank you
+
+#### Next month Ideas
+
+* MLFlow
+* Multi-Arm Bandit
+* Bayesian Optimization
+* Classroom method for training  ML models
+* Data control: Git for Data?
+
+
+
+---
+
+## References
